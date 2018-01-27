@@ -25,9 +25,9 @@ mod inner {
 
     impl SingleInstance {
         pub fn new(name: &str) -> Result<Self, Error> {
+            let name = CString::new(name)?;
             unsafe {
-                let name = CString::new(name)?;
-                let handle = CreateMutexA(ptr::null_mut(), 0, uuid.as_ptr());
+                let handle = CreateMutexA(ptr::null_mut(), 0, name.as_ptr());
                 let last_error = GetLastError();
                 Ok(Self { handle, last_error })
             }
@@ -62,13 +62,13 @@ mod inner {
 
     impl SingleInstance {
         pub fn new(name: &str) -> Result<Self, Error> {
+            let path = Path::new(name);
+            let file = if path.exists() {
+                File::open(path)?
+            } else {
+                File::create(path)?
+            };
             unsafe {
-	    	let path = Path::new(name);
-		let file = if path.exists() {
-		    File::open(path)? 
-		} else {
-                    File::create(path)?
-		};
                 let rc = flock(file.as_raw_fd(), LOCK_EX | LOCK_NB);
                 let is_single = rc == 0 || EWOULDBLOCK != *__errno_location();
                 Ok(Self { _file: file, is_single })
