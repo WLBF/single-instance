@@ -18,12 +18,14 @@ mod inner {
     use winapi::shared::winerror::ERROR_ALREADY_EXISTS;
     use winapi::um::handleapi::CloseHandle;
 
+    /// A struct representing one running instance.
     pub struct SingleInstance {
         handle: HANDLE,
         last_error: DWORD,
     }
 
     impl SingleInstance {
+        /// Returns a new SingleInstance object.
         pub fn new(name: &str) -> Result<Self, Error> {
             let name = CString::new(name)?;
             unsafe {
@@ -33,6 +35,7 @@ mod inner {
             }
         }
 
+        /// Returns whether this instance is single.
         pub fn is_single(&self) -> bool {
             self.last_error != ERROR_ALREADY_EXISTS
         }
@@ -55,12 +58,14 @@ mod inner {
     use failure::Error;
     use libc::{flock, LOCK_EX, LOCK_NB, EWOULDBLOCK, __errno_location};
 
+    /// A struct representing one running instance.
     pub struct SingleInstance {
         _file: File,
         is_single: bool,
     }
 
     impl SingleInstance {
+        /// Returns a new SingleInstance object.
         pub fn new(name: &str) -> Result<Self, Error> {
             let path = Path::new(name);
             let file = if path.exists() {
@@ -75,8 +80,17 @@ mod inner {
             }
         }
 
+        /// Returns whether this instance is single.
         pub fn is_single(&self) -> bool {
             self.is_single
         }
     }
+}
+
+#[test]
+fn test_single_instance() {
+    let instance_a = SingleInstance::new("aa2d0258-ffe9-11e7-ba89-0ed5f89f718b").unwrap();
+    assert!(instance_a.is_single());
+    let instance_b = SingleInstance::new("aa2d0258-ffe9-11e7-ba89-0ed5f89f718b").unwrap();
+    assert!(!instance_b.is_single());
 }
