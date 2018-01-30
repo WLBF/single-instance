@@ -1,3 +1,31 @@
+//! A rust library for single instance application.
+//!
+//! single-instance provides a single API to check if there are any other running instance.
+//!
+//! ## Usage
+//! On Windows, init `SingleInstance` will create a *Mutex* named by given `&str`
+//! then check error code by calling `GetLastError`. On Linux, init will create or open a file
+//! which path is given `&str`, then call `flock` to apply an advisory lock on the open file.
+//!
+//! ### Examples
+//! ```rust
+//! extern crate single_instance;
+//!
+//! use std::thread;
+//! use single_instance::SingleInstance;
+//!
+//! fn main() {
+//!     let instance = SingleInstance::new("whatever").unwrap();
+//!     let is_single = instance.is_single();
+//!     assert!(is_single);
+//!
+//!     loop {
+//!         thread::park();
+//!     }
+//! }
+//! ```
+
+
 extern crate failure;
 #[cfg(windows)]
 extern crate winapi;
