@@ -25,8 +25,7 @@ use single_instance::SingleInstance;
 
 fn main() {
     let instance = SingleInstance::new("whatever").unwrap();
-    let is_single = instance.is_single();
-    assert!(is_single);
+    assert!(instance.is_single());
 
     loop {
         thread::park();
