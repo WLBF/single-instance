@@ -18,10 +18,6 @@
 //!     let instance = SingleInstance::new("whatever").unwrap();
 //!     let is_single = instance.is_single();
 //!     assert!(is_single);
-//!
-//!     loop {
-//!         thread::park();
-//!     }
 //! }
 //! ```
 
@@ -117,8 +113,12 @@ mod inner {
 
 #[test]
 fn test_single_instance() {
-    let instance_a = SingleInstance::new("aa2d0258-ffe9-11e7-ba89-0ed5f89f718b").unwrap();
-    assert!(instance_a.is_single());
-    let instance_b = SingleInstance::new("aa2d0258-ffe9-11e7-ba89-0ed5f89f718b").unwrap();
-    assert!(!instance_b.is_single());
+    {
+        let instance_a = SingleInstance::new("aa2d0258-ffe9-11e7-ba89-0ed5f89f718b").unwrap();
+        assert!(instance_a.is_single());
+        let instance_b = SingleInstance::new("aa2d0258-ffe9-11e7-ba89-0ed5f89f718b").unwrap();
+        assert!(!instance_b.is_single());
+    }
+    let instance_c = SingleInstance::new("aa2d0258-ffe9-11e7-ba89-0ed5f89f718b").unwrap();
+    assert!(instance_c.is_single());
 }
