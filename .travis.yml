@@ -5,7 +5,7 @@ rust:
   - beta
   - nightly
 script:
-  - cargo build --verbose
+  - cargo test
 
 notifications:
   email:
