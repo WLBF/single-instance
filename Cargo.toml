@@ -1,6 +1,6 @@
 [package]
 name = "single-instance"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["wlbf <lbf1353@live.com>"]
 license = "MIT"
 description = "A rust library for single instance application."
@@ -14,6 +14,7 @@ include = [
 
 [dependencies]
 failure = "0.1.1"
+widestring = "0.2.2"
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["synchapi", "winnt", "errhandlingapi", "winerror", "handleapi"] }

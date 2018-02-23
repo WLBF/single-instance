@@ -24,6 +24,8 @@
 extern crate failure;
 #[cfg(windows)]
 extern crate winapi;
+#[cfg(windows)]
+extern crate widestring;
 #[cfg(unix)]
 extern crate libc;
 
@@ -32,10 +34,10 @@ pub use self::inner::*;
 #[cfg(windows)]
 mod inner {
     use std::ptr;
-    use std::ffi::CString;
     use failure::Error;
+    use widestring::WideCString;
     use winapi::um::winnt::HANDLE;
-    use winapi::um::synchapi::CreateMutexA;
+    use winapi::um::synchapi::CreateMutexW;
     use winapi::shared::minwindef::DWORD;
     use winapi::um::errhandlingapi::GetLastError;
     use winapi::shared::winerror::ERROR_ALREADY_EXISTS;
@@ -50,9 +52,9 @@ mod inner {
     impl SingleInstance {
         /// Returns a new SingleInstance object.
         pub fn new(name: &str) -> Result<Self, Error> {
-            let name = CString::new(name)?;
+            let name = WideCString::from_str(name)?;
             unsafe {
-                let handle = CreateMutexA(ptr::null_mut(), 0, name.as_ptr());
+                let handle = CreateMutexW(ptr::null_mut(), 0, name.as_ptr());
                 let last_error = GetLastError();
                 Ok(Self { handle, last_error })
             }
