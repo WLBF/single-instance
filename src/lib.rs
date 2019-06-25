@@ -31,7 +31,7 @@ extern crate libc;
 
 pub use self::inner::*;
 
-#[cfg(windows)]
+#[cfg(target_os = "windows")]
 mod inner {
     use std::ptr;
     use failure::Error;
@@ -75,7 +75,7 @@ mod inner {
     }
 }
 
-#[cfg(unix)]
+#[cfg(target_os = "linux")]
 mod inner {
     use std::fs::File;
     use std::path::Path;
@@ -101,6 +101,43 @@ mod inner {
             unsafe {
                 let rc = flock(file.as_raw_fd(), LOCK_EX | LOCK_NB);
                 let is_single = rc == 0 || EWOULDBLOCK != *__errno_location();
+                Ok(Self { _file: file, is_single })
+            }
+        }
+
+        /// Returns whether this instance is single.
+        pub fn is_single(&self) -> bool {
+            self.is_single
+        }
+    }
+}
+
+#[cfg(target_os = "macos")]
+mod inner {
+    use std::fs::File;
+    use std::path::Path;
+    use std::os::unix::io::AsRawFd;
+    use failure::Error;
+    use libc::{flock, LOCK_EX, LOCK_NB, EWOULDBLOCK, __error};
+
+    /// A struct representing one running instance.
+    pub struct SingleInstance {
+        _file: File,
+        is_single: bool,
+    }
+
+    impl SingleInstance {
+        /// Returns a new SingleInstance object.
+        pub fn new(name: &str) -> Result<Self, Error> {
+            let path = Path::new(name);
+            let file = if path.exists() {
+                File::open(path)?
+            } else {
+                File::create(path)?
+            };
+            unsafe {
+                let rc = flock(file.as_raw_fd(), LOCK_EX | LOCK_NB);
+                let is_single = rc == 0 || EWOULDBLOCK != *__error();
                 Ok(Self { _file: file, is_single })
             }
         }
