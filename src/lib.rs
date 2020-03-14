@@ -31,7 +31,7 @@ extern crate libc;
 
 pub use self::inner::*;
 
-#[cfg(all(target_os = "windows", target_env = "msvc"))]
+#[cfg(target_os = "windows")]
 mod inner {
     use std::ptr;
     use failure::Error;
@@ -75,7 +75,7 @@ mod inner {
     }
 }
 
-#[cfg(any(target_os = "linux", target_env = "gun"))]
+#[cfg(target_os = "linux")]
 mod inner {
     use std::fs::File;
     use std::path::Path;
