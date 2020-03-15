@@ -5,7 +5,6 @@ A rust library for single instance application.
 
 [![Crates.io](https://img.shields.io/crates/v/single-instance.svg)](https://crates.io/crates/single-instance)
 [![Build Status](https://travis-ci.org/WLBF/single-instance.svg?branch=master)](https://travis-ci.org/WLBF/single-instance)
-[![Build status](https://ci.appveyor.com/api/projects/status/cnmbkhqso04577sr/branch/master?svg=true)](https://ci.appveyor.com/project/WLBF/single-instance)
 
 single-instance provides a single API to check if there are any other running instance. 
 
