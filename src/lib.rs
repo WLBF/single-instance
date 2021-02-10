@@ -23,6 +23,7 @@
 extern crate failure;
 #[cfg(unix)]
 extern crate libc;
+#[cfg(unix)]
 extern crate nix;
 #[cfg(windows)]
 extern crate widestring;
