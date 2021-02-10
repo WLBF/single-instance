@@ -21,3 +21,4 @@ winapi = { version = "0.3", features = ["synchapi", "winnt", "errhandlingapi", "
 
 [target.'cfg(unix)'.dependencies]
 libc = "0.2"
+nix = "0.19"
