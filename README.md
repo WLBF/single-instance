@@ -1,19 +1,17 @@
 single-instance
 ===
 
-A rust library for single instance application.
-
 [![Crates.io](https://img.shields.io/crates/v/single-instance.svg)](https://crates.io/crates/single-instance)
 [![Build Status](https://travis-ci.org/WLBF/single-instance.svg?branch=master)](https://travis-ci.org/WLBF/single-instance)
 
 single-instance provides a single API to check if there are any other running instance. 
 
-## Usage
-On Windows, init `SingleInstance` will create a *Mutex* named by given `&str` then check error code by calling `GetLastError`. On Linux, init will create or open a file which path is given `&str`, then call `flock` to apply an advisory lock on the open file.
+## Detail
+On windows, init `SingleInstance` will create a mutex named by given `&str` then check error code by calling `GetLastError`. On linux init will bind abstract unix domain socket with given name . On macos, init will create or open a file which path is given `&str`, then call `flock` to apply an advisory lock on the open file.
 
 ```toml
 [dependencies]
-single-instance = "0.1"
+single-instance = "0.2"
 ```
 
 ### Examples

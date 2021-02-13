@@ -2,10 +2,10 @@
 //!
 //! single-instance provides a single API to check if there are any other running instance.
 //!
-//! ## Usage
-//! On Windows, init `SingleInstance` will create a *Mutex* named by given `&str`
-//! then check error code by calling `GetLastError`. On Linux, init will create or open a file
-//! which path is given `&str`, then call `flock` to apply an advisory lock on the open file.
+//! ## Detail
+//! On windows, init `SingleInstance` will create a mutex named by given `&str` then check error code by calling `GetLastError`.
+//! On linux init will bind abstract unix domain socket with given name . On macos, init will create or open a file which path is given `&str`,
+//! then call `flock` to apply an advisory lock on the open file.
 //!
 //! ### Examples
 //! ```rust
