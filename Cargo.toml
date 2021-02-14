@@ -1,6 +1,6 @@
 [package]
 name = "single-instance"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["wlbf <lbf1353@live.com>"]
 license = "MIT"
 description = "A rust library for single instance application."
