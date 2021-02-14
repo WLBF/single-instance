@@ -11,7 +11,7 @@ On windows, init `SingleInstance` will create a mutex named by given `&str` then
 
 ```toml
 [dependencies]
-single-instance = "0.2"
+single-instance = "0.3"
 ```
 
 ### Examples
