@@ -20,22 +20,24 @@
 //! }
 //! ```
 
-extern crate failure;
-#[cfg(unix)]
+pub mod error;
+
+extern crate thiserror;
+#[cfg(target_os = "macos")]
 extern crate libc;
-#[cfg(unix)]
+#[cfg(target_os = "linux")]
 extern crate nix;
-#[cfg(windows)]
+#[cfg(target_os = "windows")]
 extern crate widestring;
-#[cfg(windows)]
+#[cfg(target_os = "windows")]
 extern crate winapi;
 
 pub use self::inner::*;
 
 #[cfg(target_os = "windows")]
 mod inner {
-    use failure::Error;
     use std::ptr;
+    use error::Result;
     use widestring::WideCString;
     use winapi::shared::minwindef::DWORD;
     use winapi::shared::winerror::ERROR_ALREADY_EXISTS;
@@ -52,7 +54,7 @@ mod inner {
 
     impl SingleInstance {
         /// Returns a new SingleInstance object.
-        pub fn new(name: &str) -> Result<Self, Error> {
+        pub fn new(name: &str) -> Result<Self> {
             let name = WideCString::from_str(name)?;
             unsafe {
                 let handle = CreateMutexW(ptr::null_mut(), 0, name.as_ptr());
@@ -78,11 +80,11 @@ mod inner {
 
 #[cfg(target_os = "linux")]
 mod inner {
-    use failure::Error;
     use nix::errno::Errno;
     use nix::sys::socket::{self, UnixAddr};
     use nix::unistd;
     use std::os::unix::prelude::RawFd;
+    use error::Result;
 
     /// A struct representing one running instance.
     pub struct SingleInstance {
@@ -91,7 +93,7 @@ mod inner {
 
     impl SingleInstance {
         /// Returns a new SingleInstance object.
-        pub fn new(name: &str) -> Result<Self, Error> {
+        pub fn new(name: &str) -> Result<Self> {
             let addr = UnixAddr::new_abstract(name.as_bytes())?;
             let sock = socket::socket(
                 socket::AddressFamily::Unix,
@@ -127,11 +129,11 @@ mod inner {
 
 #[cfg(target_os = "macos")]
 mod inner {
-    use failure::Error;
     use libc::{__error, flock, EWOULDBLOCK, LOCK_EX, LOCK_NB};
     use std::fs::File;
     use std::os::unix::io::AsRawFd;
     use std::path::Path;
+    use error::Result;
 
     /// A struct representing one running instance.
     pub struct SingleInstance {
@@ -141,7 +143,7 @@ mod inner {
 
     impl SingleInstance {
         /// Returns a new SingleInstance object.
-        pub fn new(name: &str) -> Result<Self, Error> {
+        pub fn new(name: &str) -> Result<Self> {
             let path = Path::new(name);
             let file = if path.exists() {
                 File::open(path)?

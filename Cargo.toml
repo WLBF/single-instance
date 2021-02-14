@@ -13,8 +13,8 @@ include = [
 ]
 
 [dependencies]
-failure = "0.1.7"
-widestring = "0.2.2"
+thiserror = "1.0"
+widestring = "0.4.3"
 
 [target.'cfg(windows)'.dependencies]
 winapi = { version = "0.3", features = ["synchapi", "winnt", "errhandlingapi", "winerror", "handleapi"] }
