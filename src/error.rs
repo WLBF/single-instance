@@ -2,19 +2,15 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum SingleInstanceError {
-    #[cfg(target_os = "linux")]
-    #[error("new abstract addr error")]
-    Nix(#[from] nix::Error),
-
-    #[cfg(target_os = "macos")]
+    #[cfg(unix)]
     #[error("file open or create error")]
     Io(#[from] std::io::Error),
 
-    #[cfg(target_os = "windows")]
+    #[cfg(windows)]
     #[error("wide string null error")]
     Nul(#[from] widestring::NulError<widestring::WideChar>),
 
-    #[cfg(target_os = "windows")]
+    #[cfg(windows)]
     #[error("CreateMutex failed with error code {0}")]
     MutexError(u32),
 }

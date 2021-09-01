@@ -14,11 +14,10 @@ include = [
 
 [dependencies]
 thiserror = "1.0"
-widestring = "0.4.3"
 
 [target.'cfg(windows)'.dependencies]
+widestring = "0.4.3"
 winapi = { version = "0.3", features = ["synchapi", "winnt", "errhandlingapi", "winerror", "handleapi"] }
 
 [target.'cfg(unix)'.dependencies]
-libc = "0.2"
-nix = "0.19"
+nix = "0.22"
