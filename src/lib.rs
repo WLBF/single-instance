@@ -22,11 +22,11 @@
 
 pub mod error;
 
-extern crate thiserror;
 #[cfg(target_os = "macos")]
 extern crate libc;
 #[cfg(target_os = "linux")]
 extern crate nix;
+extern crate thiserror;
 #[cfg(target_os = "windows")]
 extern crate widestring;
 #[cfg(target_os = "windows")]
@@ -36,11 +36,10 @@ pub use self::inner::*;
 
 #[cfg(target_os = "windows")]
 mod inner {
+    use error::{Result, SingleInstanceError};
     use std::ptr;
-    use error::Result;
     use widestring::WideCString;
-    use winapi::shared::minwindef::DWORD;
-    use winapi::shared::winerror::ERROR_ALREADY_EXISTS;
+    use winapi::shared::winerror::{ERROR_ALREADY_EXISTS, ERROR_INVALID_HANDLE};
     use winapi::um::errhandlingapi::GetLastError;
     use winapi::um::handleapi::CloseHandle;
     use winapi::um::synchapi::CreateMutexW;
@@ -48,9 +47,11 @@ mod inner {
 
     /// A struct representing one running instance.
     pub struct SingleInstance {
-        handle: HANDLE,
-        last_error: DWORD,
+        handle: Option<HANDLE>,
     }
+
+    unsafe impl Send for SingleInstance {}
+    unsafe impl Sync for SingleInstance {}
 
     impl SingleInstance {
         /// Returns a new SingleInstance object.
@@ -59,20 +60,33 @@ mod inner {
             unsafe {
                 let handle = CreateMutexW(ptr::null_mut(), 0, name.as_ptr());
                 let last_error = GetLastError();
-                Ok(Self { handle, last_error })
+
+                // https://docs.microsoft.com/en-us/windows/win32/api/synchapi/nf-synchapi-createmutexexw
+                if handle.is_null() || handle == ERROR_INVALID_HANDLE as _ {
+                    Err(SingleInstanceError::MutexError(last_error))
+                } else if last_error == ERROR_ALREADY_EXISTS {
+                    CloseHandle(handle);
+                    Ok(SingleInstance { handle: None })
+                } else {
+                    Ok(SingleInstance {
+                        handle: Some(handle),
+                    })
+                }
             }
         }
 
         /// Returns whether this instance is single.
         pub fn is_single(&self) -> bool {
-            self.last_error != ERROR_ALREADY_EXISTS
+            self.handle.is_some()
         }
     }
 
     impl Drop for SingleInstance {
         fn drop(&mut self) {
-            unsafe {
-                CloseHandle(self.handle);
+            if let Some(handle) = self.handle.take() {
+                unsafe {
+                    CloseHandle(handle);
+                }
             }
         }
     }
@@ -80,11 +94,11 @@ mod inner {
 
 #[cfg(target_os = "linux")]
 mod inner {
+    use error::Result;
     use nix::errno::Errno;
     use nix::sys::socket::{self, UnixAddr};
     use nix::unistd;
     use std::os::unix::prelude::RawFd;
-    use error::Result;
 
     /// A struct representing one running instance.
     pub struct SingleInstance {
@@ -129,11 +143,11 @@ mod inner {
 
 #[cfg(target_os = "macos")]
 mod inner {
+    use error::Result;
     use libc::{__error, flock, EWOULDBLOCK, LOCK_EX, LOCK_NB};
     use std::fs::File;
     use std::os::unix::io::AsRawFd;
     use std::path::Path;
-    use error::Result;
 
     /// A struct representing one running instance.
     pub struct SingleInstance {
