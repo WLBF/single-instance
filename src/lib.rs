@@ -95,7 +95,6 @@ mod inner {
 #[cfg(target_os = "linux")]
 mod inner {
     use error::Result;
-    use nix::errno::Errno;
     use nix::sys::socket::{self, UnixAddr};
     use nix::unistd;
     use std::os::unix::prelude::RawFd;
@@ -118,7 +117,7 @@ mod inner {
 
             let maybe_sock = match socket::bind(sock, &socket::SockAddr::Unix(addr)) {
                 Ok(()) => Some(sock),
-                Err(nix::Error::Sys(Errno::EADDRINUSE)) => None,
+                Err(nix::errno::Errno::EADDRINUSE) => None,
                 Err(e) => return Err(e.into()),
             };
 
