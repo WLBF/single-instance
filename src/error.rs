@@ -2,7 +2,7 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum SingleInstanceError {
-    #[cfg(target_os = "linux")]
+    #[cfg(any(target_os = "linux", target_os="android"))]
     #[error("new abstract addr error")]
     Nix(#[from] nix::Error),
 
