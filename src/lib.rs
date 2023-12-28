@@ -111,7 +111,9 @@ mod inner {
             let sock = socket::socket(
                 socket::AddressFamily::Unix,
                 socket::SockType::Stream,
-                socket::SockFlag::empty(),
+                // If we fork and exec, then make sure the child process doesn't
+                // hang on to this file descriptor.
+                socket::SockFlag::SOCK_CLOEXEC,
                 None,
             )?;
 
