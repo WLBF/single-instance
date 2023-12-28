@@ -24,7 +24,7 @@ pub mod error;
 
 #[cfg(target_os = "macos")]
 extern crate libc;
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "linux", target_os ="android"))]
 extern crate nix;
 extern crate thiserror;
 #[cfg(target_os = "windows")]
@@ -92,7 +92,7 @@ mod inner {
     }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(any(target_os = "linux", target_os="android"))]
 mod inner {
     use error::Result;
     use nix::sys::socket::{self, UnixAddr};
