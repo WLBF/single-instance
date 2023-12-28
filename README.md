@@ -31,3 +31,46 @@ fn main() {
     assert!(instance_c.is_single());
 }
 ```
+
+### Ensuring the SingleInstance stays during lifetime of the process
+Users should ensure that instance of SingleInstace should lives in lifetime of the calling process. 
+This could be achieved in multiple ways. Few ways are:
+ * Using std::sync::Once
+```rust
+static mut SINGLE_INSTANCE_VAL : Option<SingleInstance> = None;
+static SINGLE_INSTANCE_VAL_LOCK: Once = Once::new();
+
+pub fn ensure_single_instance(uniq_id: &str) -> bool {
+    let instance =  SingleInstance::new(&uniq_id);
+    match  instance{
+        Ok(inst) => {
+            let single = inst.is_single();
+            if single {
+                unsafe {
+                    SINGLE_INSTANCE_VAL_LOCK.call_once(|| {
+                        SINGLE_INSTANCE_VAL = Some(inst);
+                    })
+                }
+            }
+            single
+        },
+        Err(e) => {
+            false
+        }
+    }
+}
+
+```
+ * Using Box::leak. This example is in examples/multi_instance_server.rs
+ ```rust
+pub fn ensure_single_instance(uniq_id: &str) -> bool {
+    let instance = Box::new(SingleInstance::new(uniq_id).unwrap());
+    if instance.is_single() {
+        Box::leak(instance);
+        true
+    }else {
+        false
+    }
+}
+ ```
+
